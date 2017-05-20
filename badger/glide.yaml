@@ -1,0 +1,4 @@
+package: .
+import:
+  - package: github.com/dgraph-io/badger
+  - package: github.com/AndreasBriese/bbloom
