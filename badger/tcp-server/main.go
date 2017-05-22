@@ -11,6 +11,7 @@ import (
 	"os/signal"
 	"regexp"
 	"strings"
+	"sync"
 	"syscall"
 
 	"github.com/dgraph-io/badger/badger"
@@ -31,6 +32,9 @@ var operationMap = map[string]operationHandler{
 	"QUIT":   handleQuit,
 	"":       handleEmpty,
 }
+
+var isServing = true
+var wg sync.WaitGroup
 
 func main() {
 	path := flag.String("path", "/var/lib/badger", "path to KV store")
@@ -57,7 +61,10 @@ func main() {
 	opt.Dir = *path
 	opt.SyncWrites = *syncWrite
 	opt.Verbose = true
-	kv := badger.NewKV(&opt)
+	kv, err := badger.NewKV(&opt)
+	if err != nil {
+		log.Fatalf("unable to open KV store [%s]: %v\n", *path, err)
+	}
 	defer kv.Close()
 
 	// shutdown gracefully when SIGTERM/SIGINT
@@ -69,13 +76,13 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to listen on [%s]: %v\n", *address, err)
 	}
+	defer listener.Close()
 
 	// handle incoming connection requests
 	chanConnection := make(chan net.Conn)
-	acceptConn := false
 	go func() {
-		for !acceptConn {
-			if conn, err := listener.Accept(); err != nil && !acceptConn {
+		for isServing {
+			if conn, err := listener.Accept(); err != nil && isServing {
 				log.Printf("Failed to accept: %v\n", err)
 			} else {
 				chanConnection <- conn
@@ -83,7 +90,7 @@ func main() {
 		}
 	}()
 
-	for !acceptConn {
+	for isServing {
 		select {
 		case sig := <-chanSignal:
 			// duplicated code, just show how to handle different signals
@@ -93,12 +100,15 @@ func main() {
 			case syscall.SIGINT:
 				log.Printf("Received SIGINT, stopping\n")
 			}
-			acceptConn = true
-			listener.Close()
+			isServing = false
 		case connection := <-chanConnection:
+			wg.Add(1)
 			go handleRequest(connection, kv)
 		}
 	}
+
+	// wait till all clients disconnected
+	wg.Wait()
 	log.Printf("Done\n")
 }
 
@@ -109,7 +119,7 @@ func handleRequest(connection net.Conn, kv *badger.KV) {
 	// protocol is line-oriented
 	reader := bufio.NewScanner(connection)
 	writer := bufio.NewWriter(connection)
-	for reader.Scan() {
+	for isServing && reader.Scan() {
 		op := parseRequest(reader.Text())
 		if function, ok := operationMap[op.Operator]; ok {
 			if function(writer, kv, op.Params...) != nil {
@@ -120,10 +130,11 @@ func handleRequest(connection net.Conn, kv *badger.KV) {
 		}
 		writer.Flush()
 	}
-	if err := reader.Err(); err != nil && err != io.EOF {
+	if err := reader.Err(); err != nil && isServing {
 		log.Printf("Failed to read request: %v\n", err)
 	}
 	connection.Close()
+	wg.Done()
 	log.Printf("End of handling request from %s\n", remote)
 }
 
