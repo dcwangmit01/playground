@@ -1,4 +1,5 @@
-package: .
+package: github.com/hangxie/playground/badger
 import:
-  - package: github.com/dgraph-io/badger
-  - package: github.com/AndreasBriese/bbloom
+- package: github.com/dgraph-io/badger
+  subpackages:
+  - badger
