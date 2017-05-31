@@ -13,6 +13,7 @@ import (
 	"strings"
 	"sync"
 	"syscall"
+	"time"
 
 	"github.com/dgraph-io/badger/badger"
 )
@@ -60,6 +61,8 @@ func main() {
 	opt := badger.DefaultOptions
 	opt.Dir = *path
 	opt.SyncWrites = *syncWrite
+	opt.ValueLogFileSize = 1 << 28
+	opt.ValueGCRunInterval = 1 * time.Minute
 	opt.Verbose = true
 	kv, err := badger.NewKV(&opt)
 	if err != nil {
@@ -113,6 +116,9 @@ func main() {
 }
 
 func handleRequest(connection net.Conn, kv *badger.KV) {
+	defer wg.Done()
+	defer connection.Close()
+
 	remote := connection.RemoteAddr().String()
 	log.Printf("Start to handle request from %s\n", remote)
 
@@ -133,8 +139,6 @@ func handleRequest(connection net.Conn, kv *badger.KV) {
 	if err := reader.Err(); err != nil && isServing {
 		log.Printf("Failed to read request: %v\n", err)
 	}
-	connection.Close()
-	wg.Done()
 	log.Printf("End of handling request from %s\n", remote)
 }
 
@@ -143,11 +147,13 @@ func handleGet(writer *bufio.Writer, kv *badger.KV, params ...string) error {
 	if len(params) < 1 {
 		fmt.Fprintf(writer, "GET need a key\n")
 	} else {
-		value, _ := kv.Get([]byte(params[0]))
-		if value == nil {
+		var item badger.KVItem
+		if err := kv.Get([]byte(params[0]), &item); err != nil {
+			fmt.Fprintf(writer, "Internal Error: %s\n", nil)
+		} else if item.Value() == nil {
 			fmt.Fprintf(writer, "NOT FOUND\n")
 		} else {
-			fmt.Fprintf(writer, "%s\n", string(value))
+			fmt.Fprintf(writer, "%s\n", string(item.Value()))
 		}
 	}
 	return nil
