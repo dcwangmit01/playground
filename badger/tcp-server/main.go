@@ -63,7 +63,6 @@ func main() {
 	opt.SyncWrites = *syncWrite
 	opt.ValueLogFileSize = 1 << 28
 	opt.ValueGCRunInterval = 1 * time.Minute
-	opt.Verbose = true
 	kv, err := badger.NewKV(&opt)
 	if err != nil {
 		log.Fatalf("unable to open KV store [%s]: %v\n", *path, err)

@@ -1,21 +1,21 @@
 hash: 2490a89ade3d916919ab3a01854e633ccf3e77a6f3e0cae93c9dd89a18797930
-updated: 2017-05-31T07:40:28.725504283-07:00
+updated: 2017-06-11T15:49:21.176167149-07:00
 imports:
 - name: github.com/AndreasBriese/bbloom
   version: 0320de81a58b973b5187098f4815608711c70f3b
 - name: github.com/bkaradzic/go-lz4
-  version: 74ddf82598bc4745b965729e9c6a463bedd33049
+  version: 7224d8d8f27ef618c0a95f1ae69dbb0488abc33a
 - name: github.com/dgraph-io/badger
-  version: ae33a80e2336d89d8300813da59edb851df07f07
+  version: 60253fc2838f5439ecc3c14cd03c548a44610845
   subpackages:
   - badger
   - skl
   - table
   - "y"
 - name: github.com/pkg/errors
-  version: 645ef00459ed84a119197bfb8d8205042c6df63d
+  version: c605e284fe17294bda444b34710735b29d1a9d90
 - name: golang.org/x/net
-  version: 3da985ce5951d99de868be4385f21ea6c2b22f24
+  version: 1a68b1313cf4ad7778376e82641197b60c02f65c
   subpackages:
   - context
   - internal/timeseries
