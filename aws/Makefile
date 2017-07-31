@@ -6,13 +6,13 @@ install:
 	glide install
 
 build:
-	mkdir -p bin/
-	go build -o bin/create-ec2 create-ec2.go
-	go build -o bin/destroy-ec2 destroy-ec2.go
+	mkdir -p build/
+	go build -o build/create-ec2 create-ec2.go
+	go build -o build/destroy-ec2 destroy-ec2.go
 
 clean:
 	rm -rf vendor
-	rm -rf bin/
+	rm -rf build/
 
 test:
 	go test
