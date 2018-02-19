@@ -1,5 +1,0 @@
-package: github.com/hangxie/playground/badger
-import:
-- package: github.com/dgraph-io/badger
-  subpackages:
-  - badger

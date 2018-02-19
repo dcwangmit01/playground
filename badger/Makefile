@@ -2,8 +2,8 @@
 
 all: release
 
-install:
-	glide install
+dep:
+	dep ensure
 
 clean:
 	rm -rf vendor
