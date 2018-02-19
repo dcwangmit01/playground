@@ -2,8 +2,8 @@
 
 all: build
 
-install:
-	glide install
+dep:
+	dep ensure
 
 build:
 	mkdir -p build/
