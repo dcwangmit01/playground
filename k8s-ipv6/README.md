@@ -4,7 +4,7 @@ How to Use
   ```
   terraform apply -var aws-access-key=access-key -var aws-secret-key=secret-key -var aws-keypair=hanxie -var env-name=hanxie-test -auto-approve
   ```
-  This will bring 1 jump-host, 1 kube master, 2 kube nodes
+  This will bring up 1 jump host, 1 kube master, 2 kube nodes
 
 * Copy script/ to kube-master and kube-node
 
@@ -17,10 +17,10 @@ How to Use
   sh master-setup.sh kube-master-0 fd00:1234::/110 fd00:5678::/110 123456.0123456789abcdef
   ```
 
-  * kube-master-0: name of the master
-  * fd00:1234::/110: pod CIDR
-  * fd00:5678::/110: service CIDR
-  * 123456.0123456789abcdef: kubeadm token, you can use this to get a better one:
+  * `kube-master-0`: name of the master
+  * `fd00:1234::/110`: pod CIDR
+  * `fd00:5678::/110`: service CIDR
+  * `123456.0123456789abcdef`: kubeadm token, you can use this to get a better one:
      ```
      echo $(openssl rand -hex 6).$(openssl rand -hex 16)
      ```
@@ -36,10 +36,10 @@ How to Use
   sh node-setup.sh kube-node-name IPv6-of-master fd00:5678::a 123456.0123456789abcdef
   ```
 
-  * kube-node-name: name of the kube node, needs to be unique within the same cluster
-  * IPv6-of-master: IPv6 Address of kube master
-  * fd00:5678::a: kube DNS' service IP, it has to be the 10th IP in service CIDR used by kube master
-  * 123456.0123456789abcdef: kubeadm token, this needs to be the same as the one used by kube master
+  * `kube-node-name`: name of the kube node, needs to be unique within the same cluster
+  * `IPv6-of-master`: IPv6 Address of kube master
+  * `fd00:5678::a`: kube DNS' service IP, it has to be the 10th IP in service CIDR used by kube master
+  * `123456.0123456789abcdef`: kubeadm token, this needs to be the same as the one used by kube master
 
 * Use pod definition in samples/ to create sample pod, so you can try out connection
 
