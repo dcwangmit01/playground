@@ -18,7 +18,8 @@ set -e
 
 kubectl get no >/dev/null 2>&1 && echo kubernetes is running && exit
 
-HOST_IP=$(ip -6 addr show dev ens3 scope global | grep inet6 | awk '{print $2}' | cut -f 1 -d /)
+NIC=$(ip route | grep default | awk '{print $5}')
+HOST_IP=$(ip -6 addr show dev $NIC scope global | grep inet6 | awk '{print $2}' | cut -f 1 -d /)
 hostnamectl set-hostname $HOST_NAME
 sed -i "/$HOST_NAME/d" /etc/hosts
 echo $HOST_IP $HOST_NAME >> /etc/hosts
